@@ -11,6 +11,7 @@ window.game.core = function () {
 		// Attributes
 		player: {
 			// Attributes
+			tilt: 90 * Math.PI / 180,
 
 			// Player entity including mesh and rigid body
 			model: null,
@@ -73,7 +74,7 @@ window.game.core = function () {
 				right: "d",
 				jump: "space"
 			},
-			
+
 			// Methods
 			create: function() {
 				// Create a global physics material for the player which will be used as ContactMaterial for all other objects in the level
@@ -84,6 +85,20 @@ window.game.core = function () {
 					new THREE.MeshLambertMaterial({ color: window.game.static.colors.cyan, shading: THREE.FlatShading }),
 					new THREE.MeshLambertMaterial({ color: window.game.static.colors.green, shading: THREE.FlatShading })
 				]);
+
+				//add cycle
+				var loader = new THREE.ObjectLoader();
+				var cycle = new THREE.Object3D();
+				loader.load("game.tron.json",function (obj) {
+				     cycle.add(obj);
+				});
+
+				cycle.scale.set(10,10,10);
+				cycle.rotation.x = 90 * Math.PI / 180;
+
+				//add the model to the player
+				_game.player.model.mesh.add(cycle);
+				//_three.scene.add(cycle);
 
 				// Create the shape, mesh and rigid body for the player character and assign the physics material to it
 				_game.player.shape = new CANNON.Box(_game.player.model.halfExtents);
@@ -182,10 +197,21 @@ window.game.core = function () {
 
 				if (_events.keyboard.pressed[_game.player.controlKeys.right]) {
 					_game.player.updateAcceleration(_game.player.playerAccelerationValues.rotation, 1);
+					console.log("right key pressed - " + _game.player.tilt);
+					console.log(_game.player.tilt);
+					if (_game.player.tilt > 50 * Math.PI / 180) {
+						_game.player.tilt -= 1 * Math.PI / 180;
+					}
 				}
+
+
 
 				if (_events.keyboard.pressed[_game.player.controlKeys.left]) {
 					_game.player.updateAcceleration(_game.player.playerAccelerationValues.rotation, -1);
+
+					if (_game.player.tilt < 120 * Math.PI / 180) {
+						_game.player.tilt += 1 * Math.PI / 180;
+					}
 				}
 			},
 			accelerate: function() {
@@ -203,6 +229,8 @@ window.game.core = function () {
 			rotate: function() {
 				// Rotate player around Z axis
 				_cannon.rotateOnAxis(_game.player.rigidBody, new CANNON.Vec3(0, 0, 1), _game.player.rotationAcceleration);
+
+				_game.player.model.mesh.children[0].rotation.x = _game.player.tilt;
 
 				// Damping
 				if (!_events.keyboard.pressed[_game.player.controlKeys.left] && !_events.keyboard.pressed[_game.player.controlKeys.right]) {
@@ -385,6 +413,11 @@ window.game.core = function () {
 					_ui.fadeOut("infoboxIntro");
 				}
 			};
+
+			_events.onKeyUp = function(event) {
+				console.log("key up");
+				_game.player.tilt = 90 * Math.PI / 180;
+			}
 		}
 	};
 
