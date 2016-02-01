@@ -10,8 +10,15 @@ window.game.core = function () {
 	var _game = {
 		// Attributes
 		player: {
-			// Attributes
+			// Tilt Attributes
 			tilt: 90 * Math.PI / 180,
+			isTurningRight: false,
+			isTurningLeft: false,
+			leftTiltLimit: 91 * Math.PI / 180,
+			rightTiltLimit: 89 * Math.PI / 180,
+			maxTiltLeft: 120 * Math.PI / 180,
+			maxTiltRight: 50 * Math.PI / 180,
+			tiltStep: 1 * Math.PI / 180,
 
 			// Player entity including mesh and rigid body
 			model: null,
@@ -29,8 +36,8 @@ window.game.core = function () {
 			jumpHeight: 38,
 
 			// Configuration for player speed (acceleration and maximum speed)
-			speed: 1.5,
-			speedMax: 45,
+			speed: 5.0,
+			speedMax: 100,
 			// Configuration for player rotation (rotation acceleration and maximum rotation speed)
 			rotationSpeed: 0.007,
 			rotationSpeedMax: 0.04,
@@ -63,8 +70,8 @@ window.game.core = function () {
 			playerCoords: null,
 			cameraCoords: null,
 			// Camera offsets behind the player (horizontally and vertically)
-			cameraOffsetH: 240,
-			cameraOffsetV: 140,
+			cameraOffsetH: 140,
+			cameraOffsetV: 60,
 
 			// Keyboard configuration for game.events.js (controlKeys must be associated to game.events.keyboard.keyCodes)
 			controlKeys: {
@@ -198,19 +205,21 @@ window.game.core = function () {
 				if (_events.keyboard.pressed[_game.player.controlKeys.right]) {
 					_game.player.updateAcceleration(_game.player.playerAccelerationValues.rotation, 1);
 					console.log("right key pressed - " + _game.player.tilt);
-					console.log(_game.player.tilt);
-					if (_game.player.tilt > 50 * Math.PI / 180) {
-						_game.player.tilt -= 1 * Math.PI / 180;
+
+					//the player is turning right
+					_game.player.isTurningRight = true;
+
+					//increase the tilt
+					if (_game.player.tilt > _game.player.maxTiltRight) {
+						_game.player.tilt -= _game.player.tiltStep;
 					}
 				}
 
-
-
 				if (_events.keyboard.pressed[_game.player.controlKeys.left]) {
 					_game.player.updateAcceleration(_game.player.playerAccelerationValues.rotation, -1);
-
-					if (_game.player.tilt < 120 * Math.PI / 180) {
-						_game.player.tilt += 1 * Math.PI / 180;
+					_game.player.isTurningLeft = true;
+					if (_game.player.tilt < _game.player.maxTiltLeft) {
+						_game.player.tilt += _game.player.tiltStep;
 					}
 				}
 			},
@@ -226,11 +235,27 @@ window.game.core = function () {
 					_game.player.acceleration *= _game.player.damping;
 				}
 			},
+			resetTilt: function() {
+				//if the player is tilted right
+				if (!_game.player.isTurningRight && _game.player.tilt < _game.player.rightTiltLimit) {
+					_game.player.tilt += _game.player.tiltStep;
+					console.log(_game.player.tilt);
+				}
+				//if the player is tilted left
+				else if (!_game.player.isTurningLeft && _game.player.tilt > _game.player.leftTiltLimit) {
+					_game.player.tilt -= _game.player.tiltStep;
+					console.log(_game.player.tilt);
+				}
+			},
 			rotate: function() {
 				// Rotate player around Z axis
 				_cannon.rotateOnAxis(_game.player.rigidBody, new CANNON.Vec3(0, 0, 1), _game.player.rotationAcceleration);
 
+				//titlt player model
 				_game.player.model.mesh.children[0].rotation.x = _game.player.tilt;
+
+				//update tilt
+				_game.player.resetTilt();
 
 				// Damping
 				if (!_events.keyboard.pressed[_game.player.controlKeys.left] && !_events.keyboard.pressed[_game.player.controlKeys.right]) {
@@ -278,7 +303,7 @@ window.game.core = function () {
 				_cannon.solidMaterial = _cannon.createPhysicsMaterial(new CANNON.Material("solidMaterial"), 0, 0.1);
 
 				// Define floor settings
-				var floorSize = 800;
+				var floorSize = 2000;
 				var floorHeight = 20;
 
 				// Add a floor
@@ -332,7 +357,7 @@ window.game.core = function () {
 				});
 
 				// Grid Helper
-				var grid = new THREE.GridHelper(floorSize, floorSize / 10);
+				var grid = new THREE.GridHelper(floorSize, floorSize / 40);
 				grid.position.z = 0.5;
 				grid.rotation.x = window.game.helpers.degToRad(90);
 				_three.scene.add(grid);
@@ -415,8 +440,9 @@ window.game.core = function () {
 			};
 
 			_events.onKeyUp = function(event) {
-				console.log("key up");
-				_game.player.tilt = 90 * Math.PI / 180;
+				//No longer turning
+				_game.player.isTurningRight = false;
+				_game.player.isTurningLeft = false;
 			}
 		}
 	};
