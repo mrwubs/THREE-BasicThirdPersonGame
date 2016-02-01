@@ -88,9 +88,9 @@ window.game.core = function () {
 				_cannon.playerPhysicsMaterial = new CANNON.Material("playerMaterial");
 
 				// Create a player character based on an imported 3D model that was already loaded as JSON into game.models.player
-				_game.player.model = _three.createModel(window.game.models.player, 12, [
-					new THREE.MeshLambertMaterial({ color: window.game.static.colors.cyan, shading: THREE.FlatShading }),
-					new THREE.MeshLambertMaterial({ color: window.game.static.colors.green, shading: THREE.FlatShading })
+				_game.player.model = _three.createModel(window.game.models.player, 10, [
+					new THREE.MeshLambertMaterial({ color: window.game.static.colors.cyan,transparent: true, opacity: 0.0, shading: THREE.FlatShading }),
+					new THREE.MeshLambertMaterial({ color: window.game.static.colors.green,transparent: true, opacity: 0.0, shading: THREE.FlatShading })
 				]);
 
 				//add cycle
@@ -254,7 +254,7 @@ window.game.core = function () {
 				//titlt player model
 				_game.player.model.mesh.children[0].rotation.x = _game.player.tilt;
 
-				//update tilt
+				//update tilt towardds normal
 				_game.player.resetTilt();
 
 				// Damping
