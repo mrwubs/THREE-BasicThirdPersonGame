@@ -88,10 +88,15 @@ window.game.core = function () {
 				_cannon.playerPhysicsMaterial = new CANNON.Material("playerMaterial");
 
 				// Create a player character based on an imported 3D model that was already loaded as JSON into game.models.player
-				_game.player.model = _three.createModel(window.game.models.player, 10, [
+				_game.player.model = _three.createModel(window.game.models.player, 25, [
 					new THREE.MeshLambertMaterial({ color: window.game.static.colors.cyan,transparent: true, opacity: 0.0, shading: THREE.FlatShading }),
 					new THREE.MeshLambertMaterial({ color: window.game.static.colors.green,transparent: true, opacity: 0.0, shading: THREE.FlatShading })
 				]);
+
+				//_game.player.model.mesh.scale.x = 3;
+				//_game.player.model.mesh.scale.z = 3;
+
+				_game.player.model.mesh.applyMatrix( new THREE.Matrix4().makeScale( 2, 1, 1 ) )
 
 				//add cycle
 				var loader = new THREE.ObjectLoader();
@@ -104,6 +109,8 @@ window.game.core = function () {
 				cycle.rotation.x = 90 * Math.PI / 180;
 
 				//add the model to the player
+				cycle.applyMatrix( new THREE.Matrix4().makeScale( 6, 10, 10 ) )
+				//set the scale
 				_game.player.model.mesh.add(cycle);
 				//_three.scene.add(cycle);
 
@@ -140,6 +147,7 @@ window.game.core = function () {
 				_game.player.accelerate();
 				_game.player.rotate();
 				_game.player.updateCamera();
+				_game.player.drawLightTrail();
 
 				// Level-specific logic
 				_game.player.checkGameOver();
@@ -261,6 +269,9 @@ window.game.core = function () {
 				if (!_events.keyboard.pressed[_game.player.controlKeys.left] && !_events.keyboard.pressed[_game.player.controlKeys.right]) {
 					_game.player.rotationAcceleration *= _game.player.rotationDamping;
 				}
+			},
+			drawLightTrail() {
+
 			},
 			jump: function() {
 				// Perform a jump if player has collisions and the collision contact is beneath him (ground)
