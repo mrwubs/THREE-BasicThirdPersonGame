@@ -47,7 +47,7 @@ window.game.core = function () {
 
 			// Configuration for player speed (acceleration and maximum speed)
 			speed: 30.0,
-			speedMax: 245,
+			speedMax: 100,
 			// Configuration for player rotation (rotation acceleration and maximum rotation speed)
 			rotationSpeed: 0.007,
 			rotationSpeedMax: 0.04,
@@ -166,7 +166,7 @@ window.game.core = function () {
 					_game.player.trailGeometryTop = new THREE.Geometry();
 
 					_game.player.trailMaterial = new THREE.LineBasicMaterial({
-						color: window.game.static.colors.neonblue,
+						color: window.game.static.colors.neonorange,
 						linewidth: 1000
 					});
 
@@ -258,7 +258,7 @@ window.game.core = function () {
 					// Backward/left
 					if (_game.player[values.acceleration] < _game.player[values.speedMax]) {
 						if (_game.player[values.acceleration] <= -(_game.player[values.speedMax] / 2)) {
-							_game.player[values.acceleration] = _game.player[values.speedMax] / 4;
+							_game.player[values.acceleration] = -(_game.player[values.speedMax] / 4);
 						} else {
 							_game.player[values.acceleration] += _game.player[values.speed];
 						}
@@ -284,7 +284,7 @@ window.game.core = function () {
 				}
 
 				if (_events.keyboard.pressed[_game.player.controlKeys.backward]) {
-					_game.player.updateAcceleration(_game.player.playerAccelerationValues.position, -1);
+					_game.player.updateAcceleration(_game.player.playerAccelerationValues.position, 0.001);
 				}
 
 				if (_events.keyboard.pressed[_game.player.controlKeys.right]) {
@@ -408,10 +408,10 @@ window.game.core = function () {
 
 
 				// Grid Helper
-				var grid = new THREE.GridHelper(floorSize, floorSize / 200);
+				var grid = new THREE.GridHelper(floorSize, floorSize / 300);
 				grid.position.z = 0.5;
 				grid.rotation.x = window.game.helpers.degToRad(90);
-				grid.setColors(window.game.static.colors.green,window.game.static.colors.green);
+				grid.setColors(window.game.static.colors.neonblue,window.game.static.colors.neonblue);
 				_three.scene.add(grid);
 			}
 		},
