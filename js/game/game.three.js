@@ -40,7 +40,7 @@ window.game.three = function() {
 			_three.setup();
 
 			// Create the main perspective camera using default fov and camera size constraints
-			_three.camera = new THREE.PerspectiveCamera(_three.fov, (window.innerWidth - _three.cameraSizeConstraint.width) / (window.innerHeight - _three.cameraSizeConstraint.height), 1, 15000);
+			_three.camera = new THREE.PerspectiveCamera(_three.fov, (window.innerWidth - _three.cameraSizeConstraint.width) / (window.innerHeight - _three.cameraSizeConstraint.height), 1, 20000);
 			// Set the up vector to the Z axis so everything is aligned to the Cannon.js coordinate system
 			_three.camera.up.set(0, 0, 1);
 
