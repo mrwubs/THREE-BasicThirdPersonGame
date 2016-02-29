@@ -156,6 +156,7 @@ window.game.core = function () {
 
 				//create the trail
 				_game.player.trail.create();
+
 			},
 			trail: {
 				create: function() {
@@ -186,7 +187,6 @@ window.game.core = function () {
 					_three.scene.updateMatrixWorld();
 					var newPosition = new THREE.Vector3();
 					newPosition.getPositionFromMatrix(_game.player.lightBox.matrixWorld);
-					console.log(newPosition);
 
 					_game.player.trailGeometry.vertices[_game.player.trailSize - 1] = new THREE.Vector3(
 						newPosition.x,
@@ -289,7 +289,6 @@ window.game.core = function () {
 
 				if (_events.keyboard.pressed[_game.player.controlKeys.right]) {
 					_game.player.updateAcceleration(_game.player.playerAccelerationValues.rotation, 1);
-					console.log("right key pressed - " + _game.player.tilt);
 
 					//the player is turning right
 					_game.player.isTurningRight = true;
@@ -377,9 +376,31 @@ window.game.core = function () {
 				if (_game.player.mesh.position.z <= -800) {
 					_game.destroy();
 				}
+
+				if (_game.level.hasStarted) {
+					//check if light trail is touching the player
+					var topTrail = _game.player.trailGeometry.clone();
+					var playerPosition = _game.player.mesh.position;
+
+					for (var i = topTrail.vertices.length - 1; i >= 0; i--) {
+
+						deltaX = topTrail.vertices[i].x - playerPosition.x;
+						deltaY = topTrail.vertices[i].y - playerPosition.y;
+						deltaZ = topTrail.vertices[i].z - playerPosition.z;
+
+						var distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ);
+						if (distance < 40) {
+							console.log("hit" + distance);
+							//TODO don't destroy unless the game has been going for 10 seconds
+							_game.destroy();
+						}
+					}
+				}
+
 			}
 		},
 		level: {
+			hasStarted: false,
 			// Methods
 			create: function() {
 				// Create a solid material for all objects in the world
@@ -489,6 +510,7 @@ window.game.core = function () {
 			_events.onKeyDown = function () {
 				if (!_ui.hasClass("infoboxIntro", "fade-out")) {
 					_ui.fadeOut("infoboxIntro");
+					_game.level.hasStarted = true;
 				}
 			};
 
