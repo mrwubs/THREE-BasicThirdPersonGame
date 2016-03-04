@@ -271,6 +271,7 @@ window.game.core = function () {
 				// Jump
 				if (_events.keyboard.pressed[_game.player.controlKeys.jump]) {
 					_game.player.jump();
+					_game.level.hasStarted = true;
 				}
 
 				// Movement: forward, backward, left, right
@@ -281,10 +282,13 @@ window.game.core = function () {
 					if (!_cannon.getCollisions(_game.player.rigidBody.index)) {
 						_game.player.rigidBody.quaternion.setFromAxisAngle(new CANNON.Vec3(0, 0, 1), _game.player.rotationRadians.z);
 					}
+
+					_game.level.hasStarted = true;
 				}
 
 				if (_events.keyboard.pressed[_game.player.controlKeys.backward]) {
 					_game.player.updateAcceleration(_game.player.playerAccelerationValues.position, 0.001);
+					_game.level.hasStarted = true;
 				}
 
 				if (_events.keyboard.pressed[_game.player.controlKeys.right]) {
@@ -297,6 +301,8 @@ window.game.core = function () {
 					if (_game.player.tilt > _game.player.maxTiltRight) {
 						_game.player.tilt -= _game.player.tiltStep;
 					}
+
+					_game.level.hasStarted = true;
 				}
 
 				if (_events.keyboard.pressed[_game.player.controlKeys.left]) {
@@ -305,6 +311,8 @@ window.game.core = function () {
 					if (_game.player.tilt < _game.player.maxTiltLeft) {
 						_game.player.tilt += _game.player.tiltStep;
 					}
+
+					_game.level.hasStarted = true;
 				}
 			},
 			accelerate: function() {
@@ -384,14 +392,12 @@ window.game.core = function () {
 
 					for (var i = topTrail.vertices.length - 1; i >= 0; i--) {
 
-						deltaX = topTrail.vertices[i].x - playerPosition.x;
-						deltaY = topTrail.vertices[i].y - playerPosition.y;
-						deltaZ = topTrail.vertices[i].z - playerPosition.z;
+						var deltaX = topTrail.vertices[i].x - playerPosition.x;
+						var deltaY = topTrail.vertices[i].y - playerPosition.y;
+						var deltaZ = topTrail.vertices[i].z - playerPosition.z;
 
 						var distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ);
 						if (distance < 40) {
-							console.log("hit" + distance);
-							//TODO don't destroy unless the game has been going for 10 seconds
 							_game.destroy();
 						}
 					}
