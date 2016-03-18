@@ -20,12 +20,16 @@ window.game.core = function () {
 			maxTiltRight: 65 * Math.PI / 180,
 			tiltStep: 1 * Math.PI / 180,
 
-			//Bottom Light trail
+			//Light trail
 			trailGeometry: null,
 			trailGeometryTop: null,
 			trailSize: 10000,
 			trailOffset: null,
 			trailMaterial: null,
+
+			//timer
+			startTime: null,
+			currentTime: null,
 
 			//lightbox
 			lightBox: null,
@@ -94,6 +98,9 @@ window.game.core = function () {
 
 			// Methods
 			create: function() {
+				//get the current time
+				_game.player.startTime = new Date().getTime() / 1000;
+
 				// Create a global physics material for the player which will be used as ContactMaterial for all other objects in the level
 				_cannon.playerPhysicsMaterial = new CANNON.Material("playerMaterial");
 
@@ -183,6 +190,9 @@ window.game.core = function () {
 					_three.scene.add(trailLineTop);
 				},
 				update: function() {
+					//update the current time
+					_game.player.currentTime = new Date().getTime() / 1000;
+
 					//get the position of the lightbox
 					_three.scene.updateMatrixWorld();
 					var newPosition = new THREE.Vector3();
@@ -391,7 +401,6 @@ window.game.core = function () {
 						var distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ);
 						if (distance < 40) {
 							console.log("hit" + distance);
-							//TODO don't destroy unless the game has been going for 10 seconds
 							_game.destroy();
 						}
 					}
@@ -419,13 +428,13 @@ window.game.core = function () {
 					physicsMaterial: _cannon.solidMaterial
 				});
 
-				var box = _cannon.createRigidBody({
-					shape: new CANNON.Box(new CANNON.Vec3(200, 200, 200)),
-					mass: 1,
-					position: new CANNON.Vec3(-320, 0, 20),
-					meshMaterial: new THREE.MeshLambertMaterial({ color: window.game.static.colors.cyan }),
-					physicsMaterial: _cannon.solidMaterial
-				});
+				//var box = _cannon.createRigidBody({
+				//	shape: new CANNON.Box(new CANNON.Vec3(200, 200, 200)),
+				//	mass: 1,
+				//	position: new CANNON.Vec3(-320, 0, 20),
+				//	meshMateriatl: new THREE.MeshLambertMaterial({ color: window.game.static.colors.cyan }),
+				//	physicsMaterial: _cannon.solidMaterial
+				//});
 
 
 				// Grid Helper
@@ -463,6 +472,9 @@ window.game.core = function () {
 			_game.player = window.game.helpers.cloneObject(_gameDefaults.player);
 			_game.level = window.game.helpers.cloneObject(_gameDefaults.level);
 
+			// Level has ended
+			_game.level.hasStarted = false;
+
 			// Create player and level again
 			_game.player.create();
 			_game.level.create();
@@ -477,6 +489,13 @@ window.game.core = function () {
 			// Update Cannon.js world and player state
 			_cannon.updatePhysics();
 			_game.player.update();
+
+			//check if we need to start collision checking
+			if (_game.player.currentTime - _game.player.startTime > 2.0) {
+				_game.level.hasStarted = true;
+			}
+
+			console.log(_game.level.hasStarted);
 
 			// Render visual scene
 			_three.render();
@@ -510,7 +529,6 @@ window.game.core = function () {
 			_events.onKeyDown = function () {
 				if (!_ui.hasClass("infoboxIntro", "fade-out")) {
 					_ui.fadeOut("infoboxIntro");
-					_game.level.hasStarted = true;
 				}
 			};
 
