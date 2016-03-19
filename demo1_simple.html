@@ -32,11 +32,42 @@
 				transition:opacity 2000ms;
 				-webkit-transition:opacity 2000ms;
 			}
+
+			#score {
+				position:fixed;
+				top:10px;
+				left:105%;
+				padding:10px 30px;
+				margin:0 0 0 -300px;
+				color: white;
+				font-family: 'Orbitron', sans-serif;
+				font-size: 25px;
+			}
+
+			#check {
+				position:fixed;
+				top:45px;
+				left:105%;
+				padding:10px 30px;
+				margin:0 0 0 -300px;
+				color: white;
+				font-family: 'Orbitron', sans-serif;
+				font-size: 12px;
+			}
 		</style>
+		<link href='https://fonts.googleapis.com/css?family=Orbitron' rel='stylesheet' type='text/css'>
 	</head>
 
 	<body style="background-color:black;">
 		<div id="game"></div>
+
+		<div id="score">
+			Score: 0
+		</div>
+		<div id="check">
+			<h1>Checkpoint Distance: 0m</h1>
+		</div>
+
 
 		<div id="infobox-intro" class="infobox">
 			<h2>Welcome to the simple demo of THREE.BasicThirdPersonGame!</h2>
