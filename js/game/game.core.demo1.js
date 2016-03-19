@@ -10,6 +10,8 @@ window.game.core = function () {
 	var _game = {
 		// Attributes
 		player: {
+			score: 0,
+
 			// Tilt Attributes
 			tilt: 90 * Math.PI / 180,
 			isTurningRight: false,
@@ -51,7 +53,7 @@ window.game.core = function () {
 
 			// Configuration for player speed (acceleration and maximum speed)
 			speed: 30.0,
-			speedMax: 100,
+			speedMax: 110,
 			// Configuration for player rotation (rotation acceleration and maximum rotation speed)
 			rotationSpeed: 0.007,
 			rotationSpeedMax: 0.04,
@@ -408,8 +410,61 @@ window.game.core = function () {
 
 			}
 		},
+		checkpoint: {
+			model: null,
+
+			create: function() {
+				var x = Math.random() * (25000 - -2500) + -2500;
+				var y = Math.random() * (25000 - -2500) + -2500;
+
+				var geometry = new THREE.SphereGeometry( 100, 32, 32 );
+				var material = new THREE.MeshBasicMaterial( {color: 0xffff00} );
+				_game.checkpoint.model = new THREE.Mesh( geometry, material );
+				_game.checkpoint.model.name = "currentCheckpoint";
+				_game.checkpoint.model.position.x = x;
+				_game.checkpoint.model.position.y = y;
+
+				_three.scene.add(_game.checkpoint.model);
+			},
+
+			update: function() {
+				//check if the player is close
+
+				var playerPosition = _game.player.mesh.position;
+
+				var deltaX = _game.checkpoint.model.position.x - playerPosition.x;
+				var deltaY = _game.checkpoint.model.position.y - playerPosition.y;
+				var deltaZ = _game.checkpoint.model.position.z - playerPosition.z;
+
+				var distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ);
+				document.querySelector('#check').innerHTML = "Checkpoint Distance: " + Math.round(distance);
+
+				//if there is a hit
+				if (distance < 100) {
+					console.log("hit checkpoint");
+					var currentCheckpoint = _three.scene.getObjectByName("currentCheckpoint");
+					console.log(currentCheckpoint);
+					if (currentCheckpoint) {
+						//remove the checkpoint
+						_three.scene.remove(currentCheckpoint);
+
+						//update the player score
+						_game.player.score += 50;
+						document.querySelector("#score").innerHTML = "Score: " + _game.player.score;
+
+						//increase the speed
+						_game.player.speedMax += 30;
+
+						//create a new checkpoint
+						_game.checkpoint.create();
+					}
+				}
+			}
+		},
+
 		level: {
 			hasStarted: false,
+
 			// Methods
 			create: function() {
 				// Create a solid material for all objects in the world
@@ -454,6 +509,7 @@ window.game.core = function () {
 			// Create player and level
 			_game.player.create();
 			_game.level.create();
+			_game.checkpoint.create();
 
 			// Initiate the game loop
 			_game.loop();
@@ -490,12 +546,13 @@ window.game.core = function () {
 			_cannon.updatePhysics();
 			_game.player.update();
 
+			//update the checkpoint
+			_game.checkpoint.update();
+
 			//check if we need to start collision checking
 			if (_game.player.currentTime - _game.player.startTime > 2.0) {
 				_game.level.hasStarted = true;
 			}
-
-			console.log(_game.level.hasStarted);
 
 			// Render visual scene
 			_three.render();
@@ -549,7 +606,7 @@ window.game.core = function () {
 	// Game defaults which will be set one time after first start
 	var _gameDefaults = {
 		player: window.game.helpers.cloneObject(_game.player),
-		level: window.game.helpers.cloneObject(_game.level)
+		level: window.game.helpers.cloneObject(_game.level),
 	};
 
 	return _game;
