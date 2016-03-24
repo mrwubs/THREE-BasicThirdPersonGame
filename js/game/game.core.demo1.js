@@ -414,8 +414,11 @@ window.game.core = function () {
 			model: null,
 
 			create: function() {
-				var x = Math.random() * (25000 - -2500) + -2500;
-				var y = Math.random() * (25000 - -2500) + -2500;
+				var min = _game.level.floorSize / 2 * -1;
+				var max = min * -1;
+
+				var x = Math.random() * (max - min) + min;
+				var y = Math.random() * (max - min) + min;
 
 				var geometry = new THREE.SphereGeometry( 100, 32, 32 );
 				var material = new THREE.MeshBasicMaterial( {color: 0xffff00} );
@@ -450,7 +453,7 @@ window.game.core = function () {
 
 						//update the player score
 						_game.player.score += 50;
-						document.querySelector("#score").innerHTML = "Score: " + _game.player.score;
+						document.querySelector("#score").innerHTML = "Score: <strong>" + _game.player.score + "</strong>";
 
 						//increase the speed
 						_game.player.speedMax += 30;
@@ -464,19 +467,19 @@ window.game.core = function () {
 
 		level: {
 			hasStarted: false,
+			floorSize: 10000,
 
 			// Methods
 			create: function() {
 				// Create a solid material for all objects in the world
 				_cannon.solidMaterial = _cannon.createPhysicsMaterial(new CANNON.Material("solidMaterial"), 0, 0.1);
 
-				// Define floor settings
-				var floorSize = 50000;
+				// Define floor setting
 				var floorHeight = 5;
 
 				// Add a floor
 				_cannon.createRigidBody({
-					shape: new CANNON.Box(new CANNON.Vec3(floorSize, floorSize, floorHeight)),
+					shape: new CANNON.Box(new CANNON.Vec3(_game.level.floorSize, _game.level.floorSize, floorHeight)),
 					mass: 0,
 					position: new CANNON.Vec3(0, 0, -floorHeight),
 					meshMaterial: new THREE.MeshPhongMaterial({ color: window.game.static.colors.black }),
@@ -493,7 +496,7 @@ window.game.core = function () {
 
 
 				// Grid Helper
-				var grid = new THREE.GridHelper(floorSize, floorSize / 300);
+				var grid = new THREE.GridHelper(_game.level.floorSize, _game.level.floorSize / 150);
 				grid.position.z = 0.5;
 				grid.rotation.x = window.game.helpers.degToRad(90);
 				grid.setColors(window.game.static.colors.neonblue,window.game.static.colors.neonblue);
@@ -527,6 +530,12 @@ window.game.core = function () {
 			// Recreate player and level objects by using initial values which were copied at the first start
 			_game.player = window.game.helpers.cloneObject(_gameDefaults.player);
 			_game.level = window.game.helpers.cloneObject(_gameDefaults.level);
+			_game.checkpoint.create();
+
+			//reset the player score
+			//reset the score
+			_game.player.score = 0;
+			document.querySelector("#score").innerHTML = "Score: " + _game.player.score;
 
 			// Level has ended
 			_game.level.hasStarted = false;
@@ -606,7 +615,7 @@ window.game.core = function () {
 	// Game defaults which will be set one time after first start
 	var _gameDefaults = {
 		player: window.game.helpers.cloneObject(_game.player),
-		level: window.game.helpers.cloneObject(_game.level),
+		level: window.game.helpers.cloneObject(_game.level)
 	};
 
 	return _game;
